@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PointsEarn - Watch Ads & Earn Money</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src='//libtl.com/sdk.js' data-zone='9949756' data-sdk='show_9949756'></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border: #dee2e6;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background-color: white;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 14px;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 20px 15px;
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .earnings-display {
+            text-align: center;
+            padding: 25px 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .earnings-amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .earnings-label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--success), var(--primary));
+            border-radius: 5px;
+            width: 15%;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+
+        .task-details {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .task-description {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .task-reward {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #4895ef);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #b5179e);
+        }
+
+        .referral-code {
+            background-color: #f8f9fa;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .code {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .auth-container {
+            padding: 30px 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .auth-form {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .auth-link {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-success {
+            background-color: #d1f2eb;
+            border: 1px solid #a3e4d7;
+            color: #0e6251;
+        }
+
+        .withdraw-info {
+            background-color: #e7f5ff;
+            border: 1px solid #a5d8ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background-color: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .user-email {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            background-color: white;
+            border-top: 1px solid var(--border);
+            padding: 10px 0;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .footer-item {
+            text-align: center;
+            color: var(--gray);
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .footer-item.active {
+            color: var(--primary);
+        }
+
+        .footer-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .referral-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .stat-item {
+            flex: 1;
+            padding: 15px 0;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--border);
+            margin: 20px 0;
+        }
+
+        .instruction-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .instruction-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .instruction-list {
+            padding-left: 20px;
+        }
+
+        .instruction-list li {
+            margin-bottom: 8px;
+        }
+
+        .ad-container {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .ad-placeholder {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+
+        .ad-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .ad-info {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+
+        .ad-reward {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Spin Wheel Styles */
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .wheel {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 30px;
+        }
+
+        .wheel-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border: 8px solid white;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .wheel-center {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            border: 4px solid var(--primary);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: var(--warning);
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            z-index: 20;
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, #ff9a00, #ff5e00);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 94, 0, 0.3);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 94, 0, 0.4);
+        }
+
+        .spin-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .wheel-info {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .prize-display {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .spins-left {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .wheel-task {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* Profile Styles */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            margin-right: 20px;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .profile-email {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .profile-stat {
+            flex: 1;
+            padding: 15px 0;
+        }
+
+        .profile-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .profile-stat-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+
+        .contact-details {
+            flex: 1;
+        }
+
+        .contact-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .contact-description {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .contact-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Ad Container for Monetag */
+        .monetag-ad-container {
+            width: 100%;
+            min-height: 250px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            border: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Authentication Section -->
+        <div id="auth-section">
+            <header>
+                <div class="logo">PointsEarn</div>
+                <div class="subtitle">Watch Ads & Earn Money</div>
+            </header>
+            
+            <div class="auth-container">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Important: You must have at least 10 referrals before you can withdraw funds.
+                </div>
+                
+                <div class="instruction-box">
+                    <div class="instruction-title">How to earn:</div>
+                    <ul class="instruction-list">
+                        <li>Watch ads to earn .05 per video</li>
+                        <li>Spin the wheel to win up to .05</li>
+                        <li>Refer friends to earn .05 per referral</li>
+                        <li>Complete daily tasks to maximize earnings</li>
+                    </ul>
+                </div>
+                
+                <div class="auth-form" id="login-form">
+                    <h2 style="text-align: center; margin-bottom: 20px;">Sign In</h2>
+                    <div class="form-group">
+                        <label class="form-label" for="login-email">Email</label>
+                        <input type="email" class="form-control" id="login-email" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <input type="password" class="form-control" id="login-password" placeholder="Enter your password">
+                    </div>
+                    <button class="btn btn-block" id="login-btn">Sign In</button>
+                    <div class="auth-switch">
+                        Don't have an account? <span class="auth-link" id="show-signup">Sign Up</span>
+                    </div>
+                </div>
+                
+                <div class="auth-form hidden" id="signup-form">
+                    <h2 style="text-align: center; margin-bottom: 20px;">Sign Up</h2>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-email">Email</label>
+                        <input type="email" class="form-control" id="signup-email" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-password">Password</label>
+                        <input type="password" class="form-control" id="signup-password" placeholder="Create a password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-referral">Referral Code (Optional)</label>
+                        <input type="text" class="form-control" id="signup-referral" placeholder="Enter referral code if any">
+                    </div>
+                    <button class="btn btn-block" id="signup-btn">Sign Up</button>
+                    <div class="auth-switch">
+                        Already have an account? <span class="auth-link" id="show-login">Sign In</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main App Section -->
+        <div id="app-section" class="hidden">
+            <header>
+                <div class="logo">PointsEarn</div>
+                <div class="subtitle">Watch Ads & Earn Money</div>
+            </header>
+            
+            <div class="user-info">
+                <div class="user-email" id="user-email">user@example.com</div>
+                <button class="logout-btn" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+            
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-tab="home">Home</div>
+                <div class="nav-tab" data-tab="tasks">Tasks</div>
+                <div class="nav-tab" data-tab="withdraw">Withdraw</div>
+                <div class="nav-tab" data-tab="profile">Profile</div>
+            </div>
+            
+            <!-- Home Tab Content -->
+            <div class="content active" id="home-content">
+                <div class="earnings-display">
+                    <div class="earnings-label">Total Earnings</div>
+                    <div class="earnings-amount" id="total-earnings">.00</div>
+                    <div class="earnings-label">Balance</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Daily Progress</div>
+                    <div class="progress-label">
+                        <span>You can complete 20 ads today</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span id="completed-ads">0/20 completed</span>
+                        <span id="ads-left">You have 20 ads left</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Watch Ads & Earn</div>
+                    <div class="ad-container">
+                        <div class="monetag-ad-container" id="monetag-ad-container">
+                            <i class="fas fa-ad ad-icon"></i>
+                            <div>Monetag Ad Will Show Here</div>
+                            <div class="ad-reward">Earn .05 per ad</div>
+                        </div>
+                        <div class="ad-info">
+                            Click the button below to watch a Monetag ad and earn .05
+                        </div>
+                        <button class="btn btn-success btn-block" id="watch-ad-btn">
+                            <i class="fas fa-play-circle"></i> Watch Ad & Earn .05
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Refer & Earn</div>
+                    <div style="margin-bottom: 15px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i> 
+                        <span>Earn .05 / referral</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i> 
+                        <span>Friends get .05 bonus</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i> 
+                        <span>You earn .05 per referral</span>
+                    </div>
+                    
+                    <div class="referral-code">
+                        <div>Your Referral Code</div>
+                        <div class="code" id="referral-code">POINTS123</div>
+                        <button class="btn btn-success" id="copy-referral">Copy Code</button>
+                    </div>
+                    
+                    <button class="btn btn-block" id="share-referral">
+                        <i class="fas fa-share-alt"></i> Share Referral Link
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tasks Tab Content -->
+            <div class="content" id="tasks-content">
+                <div class="card">
+                    <div class="card-title">Available Tasks</div>
+                    <div class="task-item">
+                        <div class="task-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="task-details">
+                            <div class="task-title">Watch Ads</div>
+                            <div class="task-description">Watch short videos to earn rewards</div>
+                        </div>
+                        <div class="task-reward">.05</div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div class="task-details">
+                            <div class="task-title">Spin Wheel</div>
+                            <div class="task-description">Spin to win rewards up to .05</div>
+                        </div>
+                        <button class="btn btn-success" id="spin-wheel-task-btn">Spin</button>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-icon">
+                            <i class="fab fa-telegram"></i>
+                        </div>
+                        <div class="task-details">
+                            <div class="task-title">Telegram Channel</div>
+                            <div class="task-description">Join our Telegram channel</div>
+                            <div style="font-size: 12px; color: var(--warning); margin-top: 5px;">
+                                <i class="fas fa-exclamation-triangle"></i> Don't Unsubscribe, Or Your Account May Be Suspended!
+                            </div>
+                        </div>
+                        <button class="btn btn-success">Join</button>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="task-details">
+                            <div class="task-title">Watch Tutorial Video</div>
+                            <div class="task-description">Learn how to maximize your earnings</div>
+                        </div>
+                        <button class="btn btn-success">Watch</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Spin Wheel</div>
+                    <div class="wheel-container">
+                        <div class="wheel">
+                            <div class="wheel-pointer"></div>
+                            <div class="wheel-circle" id="wheel-circle">
+                                <!-- Wheel segments will be generated by JavaScript -->
+                            </div>
+                            <div class="wheel-center">SPIN</div>
+                        </div>
+                        
+                        <div class="prize-display" id="prize-display">
+                            Spin the wheel to win rewards!
+                        </div>
+                        
+                        <div class="spins-left" id="spins-left">
+                            Spins left today: 3
+                        </div>
+                        
+                        <button class="spin-btn" id="spin-btn">
+                            <i class="fas fa-sync-alt"></i> SPIN NOW
+                        </button>
+                        
+                        <div class="wheel-info">
+                            Watch an ad to claim your prize after spinning
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Completed Tasks</div>
+                    <div style="text-align: center; padding: 20px; color: var(--gray);">
+                        No tasks completed yet. Start earning now!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Withdraw Tab Content -->
+            <div class="content" id="withdraw-content">
+                <div class="card">
+                    <div class="card-title">Withdraw Funds</div>
+                    
+                    <div class="withdraw-info">
+                        <i class="fas fa-info-circle"></i> 
+                        You must have at least 10 referrals before you can request a withdrawal.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-control" id="payment-method">
+                            <option>Select method</option>
+                            <option>Bkash</option>
+                            <option>Nagad</option>
+                            <option>Bank Transfer</option>
+                            <option>USDT (TRC20)</option>
+                            <option>PayPal</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Amount (USD)</label>
+                        <input type="number" class="form-control" id="withdraw-amount" placeholder="0.00" min="1" step="0.01">
+                    </div>
+                    
+                    <button class="btn btn-block" id="withdraw-btn" disabled>Withdraw</button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Withdraw History</div>
+                    <div style="text-align: center; padding: 20px; color: var(--gray);">
+                        No withdrawal history found
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Tab Content -->
+            <div class="content" id="profile-content">
+                <div class="card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-name" id="profile-name">User Name</div>
+                            <div class="profile-email" id="profile-email">user@example.com</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <div class="profile-stat-value" id="profile-balance">.00</div>
+                            <div class="profile-stat-label">Balance</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="profile-stat-value" id="profile-referrals">0</div>
+                            <div class="profile-stat-label">Referrals</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="profile-stat-value" id="profile-ads">0</div>
+                            <div class="profile-stat-label">Ads Watched</div>
+                        </div>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <button class="btn btn-block" id="profile-logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Developer Contact</div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="contact-details">
+                            <div class="contact-title">Developer Contact</div>
+                            <div class="contact-description">
+                                <a href="https://devoloper.com" class="contact-link" target="_blank">https://devoloper.com</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="contact-details">
+                            <div class="contact-title">Official Group</div>
+                            <div class="contact-description">
+                                <a href="https://group.com" class="contact-link" target="_blank">https://group.com</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">App Information</div>
+                    <div class="instruction-box">
+                        <div class="instruction-title">About PointsEarn</div>
+                        <p>PointsEarn is a platform that allows you to earn money by watching ads, completing tasks, and referring friends. Our mission is to provide a simple and effective way for users to earn extra income.</p>
+                    </div>
+                    
+                    <div class="instruction-box">
+                        <div class="instruction-title">How It Works</div>
+                        <ul class="instruction-list">
+                            <li>Watch ads to earn money</li>
+                            <li>Complete daily tasks for extra rewards</li>
+                            <li>Refer friends and earn commission</li>
+                            <li>Withdraw your earnings once you reach the minimum threshold</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <footer>
+                <div class="footer-nav">
+                    <div class="footer-item active" data-tab="home">
+                        <div class="footer-icon"><i class="fas fa-home"></i></div>
+                        <div>Home</div>
+                    </div>
+                    <div class="footer-item" data-tab="tasks">
+                        <div class="footer-icon"><i class="fas fa-tasks"></i></div>
+                        <div>Tasks</div>
+                    </div>
+                    <div class="footer-item" data-tab="withdraw">
+                        <div class="footer-icon"><i class="fas fa-wallet"></i></div>
+                        <div>Withdraw</div>
+                    </div>
+                    <div class="footer-item" data-tab="profile">
+                        <div class="footer-icon"><i class="fas fa-user"></i></div>
+                        <div>Profile</div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTHoyAh_ImSZcQKYykC_2TXbWSK4aezog",
+            authDomain: "get-points-26a69.firebaseapp.com",
+            databaseURL: "https://get-points-26a69-default-rtdb.firebaseio.com",
+            projectId: "get-points-26a69",
+            storageBucket: "get-points-26a69.firebasestorage.app",
+            messagingSenderId: "187550444225",
+            appId: "1:187550444225:web:82040f04ede1f08a954240",
+            measurementId: "G-BCJP2VE3TR"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const analytics = firebase.analytics();
+
+        // DOM Elements
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const showSignup = document.getElementById('show-signup');
+        const showLogin = document.getElementById('show-login');
+        const logoutBtn = document.getElementById('logout-btn');
+        const profileLogoutBtn = document.getElementById('profile-logout-btn');
+        const userEmail = document.getElementById('user-email');
+        const profileName = document.getElementById('profile-name');
+        const profileEmail = document.getElementById('profile-email');
+        const profileBalance = document.getElementById('profile-balance');
+        const profileReferrals = document.getElementById('profile-referrals');
+        const profileAds = document.getElementById('profile-ads');
+        const totalEarnings = document.getElementById('total-earnings');
+        const watchAdBtn = document.getElementById('watch-ad-btn');
+        const progressFill = document.getElementById('progress-fill');
+        const completedAds = document.getElementById('completed-ads');
+        const adsLeft = document.getElementById('ads-left');
+        const copyReferral = document.getElementById('copy-referral');
+        const referralCode = document.getElementById('referral-code');
+        const shareReferral = document.getElementById('share-referral');
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const contents = document.querySelectorAll('.content');
+        const footerItems = document.querySelectorAll('.footer-item');
+        const spinBtn = document.getElementById('spin-btn');
+        const wheelCircle = document.getElementById('wheel-circle');
+        const prizeDisplay = document.getElementById('prize-display');
+        const spinsLeft = document.getElementById('spins-left');
+        const spinWheelTaskBtn = document.getElementById('spin-wheel-task-btn');
+        const withdrawBtn = document.getElementById('withdraw-btn');
+        const withdrawAmount = document.getElementById('withdraw-amount');
+        const paymentMethod = document.getElementById('payment-method');
+
+        // User data
+        let userData = {
+            balance: 0.00,
+            adsCompleted: 0,
+            referralCode: '',
+            referrals: [],
+            activeReferrals: 0,
+            referralEarnings: 0.00,
+            spinsUsed: 0,
+            spinReward: 0
+        };
+
+        // Wheel configuration
+        const wheelSegments = [
+            { reward: 0.05, color: '#FF6B6B', textColor: 'white' },
+            { reward: 0.01, color: '#4ECDC4', textColor: 'white' },
+            { reward: 0.02, color: '#FFD166', textColor: 'black' },
+            { reward: 0.03, color: '#06D6A0', textColor: 'white' },
+            { reward: 0.00, color: '#118AB2', textColor: 'white' },
+            { reward: 0.01, color: '#073B4C', textColor: 'white' }
+        ];
+
+        const maxSpinsPerDay = 3;
+        let isSpinning = false;
+        let currentSpinReward = 0;
+        let currentUserId = null;
+
+        // Generate a random referral code
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Create wheel segments
+        function createWheel() {
+            wheelCircle.innerHTML = '';
+            const segmentAngle = 360 / wheelSegments.length;
+            
+            wheelSegments.forEach((segment, index) => {
+                const segmentElement = document.createElement('div');
+                segmentElement.className = 'wheel-segment';
+                segmentElement.style.backgroundColor = segment.color;
+                segmentElement.style.transform = `rotate(${index * segmentAngle}deg)`;
+                segmentElement.style.color = segment.textColor;
+                
+                const rewardText = document.createElement('div');
+                rewardText.style.transform = 'rotate(45deg)';
+                rewardText.style.textAlign = 'center';
+                rewardText.innerHTML = `$${segment.reward.toFixed(2)}`;
+                rewardText.style.fontSize = '14px';
+                rewardText.style.marginTop = '20px';
+                rewardText.style.marginLeft = '20px';
+                
+                segmentElement.appendChild(rewardText);
+                wheelCircle.appendChild(segmentElement);
+            });
+        }
+
+        // Spin the wheel
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            if (userData.spinsUsed >= maxSpinsPerDay) {
+                alert('You have used all your spins for today. Come back tomorrow!');
+                return;
+            }
+            
+            isSpinning = true;
+            spinBtn.disabled = true;
+            
+            // Randomly select a reward
+            const randomIndex = Math.floor(Math.random() * wheelSegments.length);
+            currentSpinReward = wheelSegments[randomIndex].reward;
+            
+            // Calculate rotation (multiple full rotations + segment offset)
+            const segmentAngle = 360 / wheelSegments.length;
+            const extraRotations = 5; // Number of full rotations before stopping
+            const targetRotation = 360 * extraRotations + (360 - (randomIndex * segmentAngle)) - (segmentAngle / 2);
+            
+            // Apply rotation with animation
+            wheelCircle.style.transform = `rotate(${targetRotation}deg)`;
+            
+            // Update spins used in Firebase
+            userData.spinsUsed++;
+            updateUserData();
+            updateSpinsLeft();
+            
+            // Show reward after animation completes
+            setTimeout(() => {
+                isSpinning = false;
+                spinBtn.disabled = false;
+                
+                // Show reward modal
+                prizeDisplay.textContent = `You won $${currentSpinReward.toFixed(2)}!`;
+                prizeDisplay.style.background = 'linear-gradient(135deg, #ff9a00, #ff5e00)';
+                prizeDisplay.style.color = 'white';
+                
+                // Add reward to balance
+                userData.balance += currentSpinReward;
+                updateUserData();
+                updateUI();
+                
+                alert(`Congratulations! You won $${currentSpinReward.toFixed(2)}!`);
+            }, 4000);
+        }
+
+        // Update spins left display
+        function updateSpinsLeft() {
+            const spinsRemaining = maxSpinsPerDay - userData.spinsUsed;
+            spinsLeft.textContent = `Spins left today: ${spinsRemaining}`;
+            
+            if (spinsRemaining === 0) {
+                spinBtn.disabled = true;
+                spinBtn.innerHTML = '<i class="fas fa-check-circle"></i> No Spins Left';
+            }
+        }
+
+        // Check if user is logged in
+        function checkAuth() {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUserId = user.uid;
+                    await loadUserData(user.uid);
+                    authSection.classList.add('hidden');
+                    appSection.classList.remove('hidden');
+                    userEmail.textContent = user.email;
+                    profileName.textContent = user.email.split('@')[0];
+                    profileEmail.textContent = user.email;
+                    updateUI();
+                    createWheel();
+                    updateSpinsLeft();
+                } else {
+                    authSection.classList.remove('hidden');
+                    appSection.classList.add('hidden');
+                }
+            });
+        }
+
+        // Load user data from Firebase
+        async function loadUserData(userId) {
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                if (userDoc.exists) {
+                    userData = userDoc.data();
+                } else {
+                    // Create new user document if it doesn't exist
+                    userData = {
+                        email: auth.currentUser.email,
+                        balance: 0.00,
+                        adsCompleted: 0,
+                        referralCode: generateReferralCode(),
+                        referrals: [],
+                        activeReferrals: 0,
+                        referralEarnings: 0.00,
+                        spinsUsed: 0,
+                        spinReward: 0,
+                        status: 'active',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    await db.collection('users').doc(userId).set(userData);
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Update user data in Firebase
+        async function updateUserData() {
+            try {
+                await db.collection('users').doc(currentUserId).update({
+                    ...userData,
+                    lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (error) {
+                console.error('Error updating user data:', error);
+            }
+        }
+
+        // Update UI with user data
+        function updateUI() {
+            totalEarnings.textContent = `$${userData.balance.toFixed(2)}`;
+            profileBalance.textContent = `$${userData.balance.toFixed(2)}`;
+            referralCode.textContent = userData.referralCode;
+            
+            // Update progress
+            const adsCompleted = userData.adsCompleted || 0;
+            const progressPercent = Math.min((adsCompleted / 20) * 100, 100);
+            progressFill.style.width = `${progressPercent}%`;
+            completedAds.textContent = `${adsCompleted}/20 completed`;
+            adsLeft.textContent = `You have ${20 - adsCompleted} ads left`;
+            profileAds.textContent = adsCompleted;
+            
+            // Update referral stats
+            profileReferrals.textContent = userData.referrals ? userData.referrals.length : 0;
+
+            // Check if user can withdraw
+            if (userData.referrals && userData.referrals.length >= 10) {
+                withdrawBtn.disabled = false;
+                withdrawBtn.textContent = 'Withdraw';
+            } else {
+                withdrawBtn.disabled = true;
+                withdrawBtn.textContent = `Need ${10 - (userData.referrals ? userData.referrals.length : 0)} more referrals`;
+            }
+
+            // Update watch ad button state
+            if (adsCompleted >= 20) {
+                watchAdBtn.disabled = true;
+                watchAdBtn.innerHTML = '<i class="fas fa-check-circle"></i> Daily Limit Reached';
+            } else {
+                watchAdBtn.disabled = false;
+                watchAdBtn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Ad & Earn $0.05';
+            }
+        }
+
+        // Show Monetag ad for regular ad watching
+        async function showMonetagAd() {
+            return new Promise((resolve, reject) => {
+                // Check if Monetag SDK is available
+                if (typeof show_9949756 === 'undefined') {
+                    // Fallback to simulated ad if Monetag is not available
+                    simulateAd().then(resolve).catch(reject);
+                    return;
+                }
+                
+                // Use Monetag SDK to show ad
+                try {
+                    show_9949756().then(() => {
+                        resolve();
+                    }).catch((error) => {
+                        console.error('Monetag ad error:', error);
+                        // Fallback to simulated ad
+                        simulateAd().then(resolve).catch(reject);
+                    });
+                } catch (error) {
+                    console.error('Monetag ad error:', error);
+                    // Fallback to simulated ad
+                    simulateAd().then(resolve).catch(reject);
+                }
+            });
+        }
+
+        // Simulate ad for demo purposes
+        function simulateAd() {
+            return new Promise((resolve) => {
+                // Create ad simulation
+                const adSimulation = document.createElement('div');
+                adSimulation.style.position = 'fixed';
+                adSimulation.style.top = '0';
+                adSimulation.style.left = '0';
+                adSimulation.style.width = '100%';
+                adSimulation.style.height = '100%';
+                adSimulation.style.backgroundColor = 'black';
+                adSimulation.style.zIndex = '1000';
+                adSimulation.style.display = 'flex';
+                adSimulation.style.flexDirection = 'column';
+                adSimulation.style.alignItems = 'center';
+                adSimulation.style.justifyContent = 'center';
+                adSimulation.style.color = 'white';
+                
+                // Add ad content
+                adSimulation.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <h2 style="margin-bottom: 20px;">Advertisement</h2>
+                        <div style="width: 300px; height: 200px; background: linear-gradient(135deg, #4361ee, #3a0ca3); display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                            <i class="fas fa-play-circle" style="font-size: 48px;"></i>
+                        </div>
+                        <p style="margin-bottom: 20px;">This is a simulated ad. In the real app, this would be a Monetag ad.</p>
+                        <div id="ad-countdown" style="font-size: 18px; margin-bottom: 20px;">Ad will complete in 3 seconds</div>
+                        <button id="skip-ad" style="padding: 10px 20px; background: #f72585; color: white; border: none; border-radius: 5px; cursor: pointer;">Skip Ad</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(adSimulation);
+                
+                // Countdown timer
+                let countdown = 3;
+                const countdownElement = document.getElementById('ad-countdown');
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = `Ad will complete in ${countdown} seconds`;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        document.body.removeChild(adSimulation);
+                        resolve();
+                    }
+                }, 1000);
+                
+                // Skip button
+                document.getElementById('skip-ad').addEventListener('click', () => {
+                    clearInterval(countdownInterval);
+                    document.body.removeChild(adSimulation);
+                    reject(new Error('Ad skipped'));
+                });
+            });
+        }
+
+        // Submit withdrawal request to Firebase
+        async function submitWithdrawalRequest(amount, method, details) {
+            try {
+                await db.collection('withdrawals').add({
+                    userEmail: auth.currentUser.email,
+                    userId: currentUserId,
+                    amount: amount,
+                    method: method,
+                    details: details,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('Withdrawal request submitted successfully!');
+                return true;
+            } catch (error) {
+                console.error('Error submitting withdrawal:', error);
+                alert('Error submitting withdrawal request');
+                return false;
+            }
+        }
+
+        // Event Listeners
+        showSignup.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+        });
+
+        showLogin.addEventListener('click', () => {
+            signupForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        });
+
+        signupBtn.addEventListener('click', async () => {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const referral = document.getElementById('signup-referral').value;
+            
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Password should be at least 6 characters');
+                return;
+            }
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Create user document in Firestore
+                const userData = {
+                    email: email,
+                    balance: 0.00,
+                    adsCompleted: 0,
+                    referralCode: generateReferralCode(),
+                    referrals: [],
+                    activeReferrals: 0,
+                    referralEarnings: 0.00,
+                    spinsUsed: 0,
+                    spinReward: 0,
+                    status: 'active',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Process referral if provided
+                if (referral) {
+                    userData.referredBy = referral;
+                    userData.balance += 0.05;
+                    
+                    // Update referrer's data
+                    const referrerQuery = await db.collection('users').where('referralCode', '==', referral).get();
+                    if (!referrerQuery.empty) {
+                        const referrerDoc = referrerQuery.docs[0];
+                        const referrerData = referrerDoc.data();
+                        await db.collection('users').doc(referrerDoc.id).update({
+                            referrals: firebase.firestore.FieldValue.arrayUnion(email),
+                            balance: (referrerData.balance || 0) + 0.05,
+                            referralEarnings: (referrerData.referralEarnings || 0) + 0.05
+                        });
+                    }
+                    
+                    alert('Referral bonus applied! You received $0.05.');
+                }
+                
+                await db.collection('users').doc(user.uid).set(userData);
+                
+            } catch (error) {
+                alert('Signup failed: ' + error.message);
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            await auth.signOut();
+        });
+
+        profileLogoutBtn.addEventListener('click', async () => {
+            await auth.signOut();
+        });
+
+        // Watch ad button
+        watchAdBtn.addEventListener('click', async () => {
+            if (userData.adsCompleted >= 20) {
+                alert('You have reached your daily ad limit. Come back tomorrow!');
+                return;
+            }
+            
+            try {
+                watchAdBtn.disabled = true;
+                watchAdBtn.innerHTML = '<div class="loading"></div> Loading Ad...';
+                
+                await showMonetagAd();
+                
+                // Reward user
+                userData.balance += 0.05;
+                userData.adsCompleted += 1;
+                
+                // Update Firebase
+                await updateUserData();
+                updateUI();
+                
+                alert('Ad completed! You earned $0.05');
+                
+            } catch (error) {
+                console.error('Ad error:', error);
+                if (error.message !== 'Ad skipped') {
+                    alert('Failed to load ad. Please try again.');
+                }
+            } finally {
+                watchAdBtn.disabled = false;
+                watchAdBtn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Ad & Earn $0.05';
+            }
+        });
+
+        // Spin wheel button
+        spinBtn.addEventListener('click', spinWheel);
+
+        // Spin wheel task button
+        spinWheelTaskBtn.addEventListener('click', () => {
+            // Switch to tasks tab and scroll to wheel
+            navTabs.forEach(t => t.classList.remove('active'));
+            document.querySelector('.nav-tab[data-tab="tasks"]').classList.add('active');
+            
+            contents.forEach(content => content.classList.remove('active'));
+            document.getElementById('tasks-content').classList.add('active');
+            
+            footerItems.forEach(item => item.classList.remove('active'));
+            document.querySelector('.footer-item[data-tab="tasks"]').classList.add('active');
+        });
+
+        // Navigation
+        navTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                
+                navTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                contents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tabName}-content`).classList.add('active');
+                
+                footerItems.forEach(item => item.classList.remove('active'));
+                document.querySelector(`.footer-item[data-tab="${tabName}"]`).classList.add('active');
+            });
+        });
+
+        footerItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const tabName = item.getAttribute('data-tab');
+                
+                navTabs.forEach(t => t.classList.remove('active'));
+                document.querySelector(`.nav-tab[data-tab="${tabName}"]`).classList.add('active');
+                
+                contents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tabName}-content`).classList.add('active');
+                
+                footerItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        // Copy referral code
+        copyReferral.addEventListener('click', () => {
+            navigator.clipboard.writeText(referralCode.textContent)
+                .then(() => alert('Referral code copied to clipboard!'))
+                .catch(err => console.error('Failed to copy: ', err));
+        });
+
+        // Share referral link
+        shareReferral.addEventListener('click', () => {
+            const referralLink = `${window.location.origin}${window.location.pathname}?ref=${userData.referralCode}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join PointsEarn and Earn Money!',
+                    text: 'Earn money by watching ads and completing tasks. Use my referral code to get bonus!',
+                    url: referralLink
+                });
+            } else {
+                navigator.clipboard.writeText(referralLink)
+                    .then(() => alert('Referral link copied to clipboard!'))
+                    .catch(err => console.error('Failed to copy: ', err));
+            }
+        });
+
+        // Withdraw functionality
+        withdrawBtn.addEventListener('click', async () => {
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const method = document.getElementById('payment-method').value;
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            if (amount > userData.balance) {
+                alert('Insufficient balance');
+                return;
+            }
+            
+            if (method === 'Select method') {
+                alert('Please select a payment method');
+                return;
+            }
+            
+            try {
+                const details = prompt(`Please enter your ${method} details (e.g., Bkash number, Nagad number, Bank account, USDT address, PayPal email):`);
+                if (!details) {
+                    alert('Withdrawal cancelled');
+                    return;
+                }
+                
+                const success = await submitWithdrawalRequest(amount, method, details);
+                if (success) {
+                    // Update user balance
+                    userData.balance -= amount;
+                    await updateUserData();
+                    updateUI();
+                    
+                    // Reset form
+                    document.getElementById('withdraw-amount').value = '';
+                    document.getElementById('payment-method').value = 'Select method';
+                }
+            } catch (error) {
+                alert('Withdrawal failed: ' + error.message);
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            createWheel();
+            
+            // Check for referral in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            if (refCode) {
+                document.getElementById('signup-referral').value = refCode;
+            }
+        });
+    </script>
+</body>
+</html>
